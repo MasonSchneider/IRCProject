@@ -52,7 +52,7 @@
             this.btnOk.Location = new System.Drawing.Point(12, 361);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(75, 23);
-            this.btnOk.TabIndex = 5;
+            this.btnOk.TabIndex = 7;
             this.btnOk.Text = "Ok";
             this.btnOk.UseVisualStyleBackColor = true;
             this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
@@ -63,7 +63,7 @@
             this.btnCancel.Location = new System.Drawing.Point(182, 361);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
-            this.btnCancel.TabIndex = 6;
+            this.btnCancel.TabIndex = 8;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
@@ -120,7 +120,7 @@
             this.txtRooms.Multiline = true;
             this.txtRooms.Name = "txtRooms";
             this.txtRooms.Size = new System.Drawing.Size(245, 103);
-            this.txtRooms.TabIndex = 4;
+            this.txtRooms.TabIndex = 6;
             // 
             // txtNick
             // 
@@ -149,7 +149,7 @@
             this.txtPass.Name = "txtPass";
             this.txtPass.PasswordChar = '*';
             this.txtPass.Size = new System.Drawing.Size(180, 20);
-            this.txtPass.TabIndex = 3;
+            this.txtPass.TabIndex = 4;
             // 
             // label6
             // 
@@ -174,14 +174,14 @@
             this.txtUsername.Location = new System.Drawing.Point(77, 121);
             this.txtUsername.Name = "txtUsername";
             this.txtUsername.Size = new System.Drawing.Size(180, 20);
-            this.txtUsername.TabIndex = 9;
+            this.txtUsername.TabIndex = 3;
             // 
             // txtReal
             // 
             this.txtReal.Location = new System.Drawing.Point(77, 194);
             this.txtReal.Name = "txtReal";
             this.txtReal.Size = new System.Drawing.Size(180, 20);
-            this.txtReal.TabIndex = 10;
+            this.txtReal.TabIndex = 5;
             // 
             // NewServer
             // 

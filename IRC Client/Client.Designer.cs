@@ -52,6 +52,8 @@
             this.tabChats = new System.Windows.Forms.TabControl();
             this.btnJoinRoom = new System.Windows.Forms.Button();
             this.btnLeave = new System.Windows.Forms.Button();
+            this.btnDisconnect = new System.Windows.Forms.Button();
+            this.btnEdit = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -157,6 +159,8 @@
             // 
             // panel2
             // 
+            this.panel2.Controls.Add(this.btnEdit);
+            this.panel2.Controls.Add(this.btnDisconnect);
             this.panel2.Controls.Add(this.btnRemove);
             this.panel2.Controls.Add(this.btnConnectServer);
             this.panel2.Controls.Add(this.btnAddServer);
@@ -167,7 +171,7 @@
             // 
             // btnRemove
             // 
-            this.btnRemove.Location = new System.Drawing.Point(136, 33);
+            this.btnRemove.Location = new System.Drawing.Point(136, 62);
             this.btnRemove.Name = "btnRemove";
             this.btnRemove.Size = new System.Drawing.Size(75, 23);
             this.btnRemove.TabIndex = 2;
@@ -232,7 +236,7 @@
             this.tabPageMain.Padding = new System.Windows.Forms.Padding(3);
             this.tabPageMain.Size = new System.Drawing.Size(741, 486);
             this.tabPageMain.TabIndex = 0;
-            this.tabPageMain.Text = "#main";
+            this.tabPageMain.Text = "server";
             this.tabPageMain.UseVisualStyleBackColor = true;
             // 
             // txtChatMain
@@ -244,7 +248,7 @@
             this.txtChatMain.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtChatMain.Size = new System.Drawing.Size(729, 474);
             this.txtChatMain.TabIndex = 0;
-            this.txtChatMain.Text = "[time] <nick> hello, how are you?\r\n[time] <you> Good!";
+            this.txtChatMain.Text = "Connect to a server";
             // 
             // tabChats
             // 
@@ -273,6 +277,25 @@
             this.btnLeave.TabIndex = 14;
             this.btnLeave.Text = "Leave Room";
             this.btnLeave.UseVisualStyleBackColor = true;
+            // 
+            // btnDisconnect
+            // 
+            this.btnDisconnect.Location = new System.Drawing.Point(4, 33);
+            this.btnDisconnect.Name = "btnDisconnect";
+            this.btnDisconnect.Size = new System.Drawing.Size(75, 23);
+            this.btnDisconnect.TabIndex = 3;
+            this.btnDisconnect.Text = "Disconnect";
+            this.btnDisconnect.UseVisualStyleBackColor = true;
+            this.btnDisconnect.Click += new System.EventHandler(this.btnDisconnect_Click);
+            // 
+            // btnEdit
+            // 
+            this.btnEdit.Location = new System.Drawing.Point(136, 33);
+            this.btnEdit.Name = "btnEdit";
+            this.btnEdit.Size = new System.Drawing.Size(75, 23);
+            this.btnEdit.TabIndex = 4;
+            this.btnEdit.Text = "Edit";
+            this.btnEdit.UseVisualStyleBackColor = true;
             // 
             // clientForm
             // 
@@ -337,6 +360,8 @@
         private System.Windows.Forms.TabControl tabChats;
         private System.Windows.Forms.Button btnJoinRoom;
         private System.Windows.Forms.Button btnLeave;
+        private System.Windows.Forms.Button btnDisconnect;
+        private System.Windows.Forms.Button btnEdit;
     }
 }
 

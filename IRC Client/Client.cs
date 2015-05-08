@@ -9,14 +9,17 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net.Sockets;
 using System.Net;
+using System.Threading;
 
 namespace IRC_Client
 {
     public partial class clientForm : Form
     {
         string[] serverGroups;
-        Socket sock = null;
+        volatile Socket sock = null;
         IPHostEntry host = null;
+        Thread listener;
+        bool registered = false;
 
         public clientForm()
         {
@@ -25,8 +28,30 @@ namespace IRC_Client
             this.FormClosed += clientForm_FormClosed;
         }
 
+        private void listenOnSocket()
+        {
+            int bytes = 0;
+            Byte[] bytesRecieved = new Byte[256];
+            do
+            {
+                lock (sock)
+                {
+                    bytes = sock.Receive(bytesRecieved, bytesRecieved.Length, 0);
+                }
+                if (bytes > 0)
+                {                    
+                    this.writeToRoom("server", Encoding.ASCII.GetString(bytesRecieved, 0, bytes));
+                }
+            } while (true);
+        }
+
         void clientForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            if (this.listener.IsAlive)
+            {
+                this.listener.Abort();
+            }
+
             if (sock != null)
             {
                 sock.Close();
@@ -80,6 +105,16 @@ namespace IRC_Client
 
         private void btnConnectServer_Click(object sender, EventArgs e)
         {
+            if (this.listener != null && this.listener.IsAlive)
+            {
+                this.listener.Abort();
+            }
+            if (this.sock != null && this.sock.Connected)
+            {
+                this.sock.Close();
+            }
+            this.txtChatMain.Clear();
+            this.txtChatMain.AppendText("Connecting...\r\n");
             var selected = this.lstServers.SelectedIndex;
             var serverInfo = this.serverGroups[selected].Split(':');
             string serverName = serverInfo[1];
@@ -101,6 +136,8 @@ namespace IRC_Client
             }
 
             this.lblServerName.Text = serverName;
+            this.listener = new Thread(new ThreadStart(this.listenOnSocket));
+            this.listener.Start();
         }
 
         private void btnRemove_Click(object sender, EventArgs e)
@@ -115,7 +152,20 @@ namespace IRC_Client
                 if (page.Text.Equals(room))
                 {
                     TextBox box = (TextBox)page.Controls[0];
-                    box.AppendText(line);
+                    if (InvokeRequired)
+                    {
+                        this.Invoke(new Action<string, string>(writeToRoom), new object[] { room, line });
+                        continue;
+                    }
+                    string[] lines = line.Split('\n');
+                    foreach (var l in lines)
+                    {
+                        if (l.Equals(""))
+                        {
+                            continue;
+                        }
+                        box.AppendText("[" + DateTime.Now.ToString("HH:mm") + "] " + l + "\n");
+                    }
                 }
             }
         }
@@ -138,6 +188,12 @@ namespace IRC_Client
         private void btnJoinRoom_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void btnDisconnect_Click(object sender, EventArgs e)
+        {
+            this.listener.Abort();
+            this.registered = false;
         }
 
     }
