@@ -41,6 +41,8 @@
             this.lblNicks = new System.Windows.Forms.Label();
             this.lblServers = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.btnEdit = new System.Windows.Forms.Button();
+            this.btnDisconnect = new System.Windows.Forms.Button();
             this.btnRemove = new System.Windows.Forms.Button();
             this.btnConnectServer = new System.Windows.Forms.Button();
             this.btnAddServer = new System.Windows.Forms.Button();
@@ -52,8 +54,6 @@
             this.tabChats = new System.Windows.Forms.TabControl();
             this.btnJoinRoom = new System.Windows.Forms.Button();
             this.btnLeave = new System.Windows.Forms.Button();
-            this.btnDisconnect = new System.Windows.Forms.Button();
-            this.btnEdit = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -169,6 +169,25 @@
             this.panel2.Size = new System.Drawing.Size(214, 100);
             this.panel2.TabIndex = 10;
             // 
+            // btnEdit
+            // 
+            this.btnEdit.Location = new System.Drawing.Point(136, 33);
+            this.btnEdit.Name = "btnEdit";
+            this.btnEdit.Size = new System.Drawing.Size(75, 23);
+            this.btnEdit.TabIndex = 4;
+            this.btnEdit.Text = "Edit";
+            this.btnEdit.UseVisualStyleBackColor = true;
+            // 
+            // btnDisconnect
+            // 
+            this.btnDisconnect.Location = new System.Drawing.Point(4, 33);
+            this.btnDisconnect.Name = "btnDisconnect";
+            this.btnDisconnect.Size = new System.Drawing.Size(75, 23);
+            this.btnDisconnect.TabIndex = 3;
+            this.btnDisconnect.Text = "Disconnect";
+            this.btnDisconnect.UseVisualStyleBackColor = true;
+            this.btnDisconnect.Click += new System.EventHandler(this.btnDisconnect_Click);
+            // 
             // btnRemove
             // 
             this.btnRemove.Location = new System.Drawing.Point(136, 62);
@@ -211,7 +230,7 @@
             // 
             this.lstNicks.FormattingEnabled = true;
             this.lstNicks.Items.AddRange(new object[] {
-            "Must connect to a server"});
+            "Must join a channel"});
             this.lstNicks.Location = new System.Drawing.Point(1002, 69);
             this.lstNicks.Name = "lstNicks";
             this.lstNicks.SelectionMode = System.Windows.Forms.SelectionMode.None;
@@ -263,39 +282,20 @@
             // 
             this.btnJoinRoom.Location = new System.Drawing.Point(366, 46);
             this.btnJoinRoom.Name = "btnJoinRoom";
-            this.btnJoinRoom.Size = new System.Drawing.Size(75, 22);
+            this.btnJoinRoom.Size = new System.Drawing.Size(82, 22);
             this.btnJoinRoom.TabIndex = 13;
-            this.btnJoinRoom.Text = "Join Room";
+            this.btnJoinRoom.Text = "Join Channel";
             this.btnJoinRoom.UseVisualStyleBackColor = true;
             this.btnJoinRoom.Click += new System.EventHandler(this.btnJoinRoom_Click);
             // 
             // btnLeave
             // 
-            this.btnLeave.Location = new System.Drawing.Point(904, 48);
+            this.btnLeave.Location = new System.Drawing.Point(897, 48);
             this.btnLeave.Name = "btnLeave";
-            this.btnLeave.Size = new System.Drawing.Size(80, 20);
+            this.btnLeave.Size = new System.Drawing.Size(87, 20);
             this.btnLeave.TabIndex = 14;
-            this.btnLeave.Text = "Leave Room";
+            this.btnLeave.Text = "Leave Channel";
             this.btnLeave.UseVisualStyleBackColor = true;
-            // 
-            // btnDisconnect
-            // 
-            this.btnDisconnect.Location = new System.Drawing.Point(4, 33);
-            this.btnDisconnect.Name = "btnDisconnect";
-            this.btnDisconnect.Size = new System.Drawing.Size(75, 23);
-            this.btnDisconnect.TabIndex = 3;
-            this.btnDisconnect.Text = "Disconnect";
-            this.btnDisconnect.UseVisualStyleBackColor = true;
-            this.btnDisconnect.Click += new System.EventHandler(this.btnDisconnect_Click);
-            // 
-            // btnEdit
-            // 
-            this.btnEdit.Location = new System.Drawing.Point(136, 33);
-            this.btnEdit.Name = "btnEdit";
-            this.btnEdit.Size = new System.Drawing.Size(75, 23);
-            this.btnEdit.TabIndex = 4;
-            this.btnEdit.Text = "Edit";
-            this.btnEdit.UseVisualStyleBackColor = true;
             // 
             // clientForm
             // 
