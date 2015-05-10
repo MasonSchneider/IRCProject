@@ -29,13 +29,13 @@ namespace IRC_Client
 
             if (nick.Length == 0 || server.Length == 0 || port.Length == 0 || real.Length == 0 || user.Length == 0)
             {
-                MessageBox.Show("Nickname, Server, and Port are required.", "Fields left blank");
+                MessageBox.Show("Nickname, Server, Port, Real Name, and Username are required.", "Fields left blank");
                 return;
             }
 
             if (pass.Length == 0)
             {
-                pass = "*";
+                pass = "**";
             }
 
             string curr = (string)Properties.Settings.Default["servers"];

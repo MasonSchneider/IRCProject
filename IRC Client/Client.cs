@@ -19,7 +19,6 @@ namespace IRC_Client
         volatile Socket sock = null;
         IPHostEntry host = null;
         Thread listener;
-        bool registered = false;
 
         public clientForm()
         {
@@ -28,7 +27,7 @@ namespace IRC_Client
             this.FormClosed += clientForm_FormClosed;
         }
 
-        private void listenOnSocket()
+        private void listenOnMainSocket()
         {
             int bytes = 0;
             Byte[] bytesRecieved = new Byte[256];
@@ -122,22 +121,51 @@ namespace IRC_Client
             string port = serverInfo[2];
             string pass = serverInfo[3];
             string rooms = serverInfo[4];
+            string real = serverInfo[5];
+            string user = serverInfo[6];
+            this.lblServerName.Text = serverName;
+
+            this.sock = startSocket(serverName, port);
+
+            if (!this.sock.Connected)
+            {
+                MessageBox.Show("Failed to connect to server.");
+            }
+
+            this.loginWithSocket(this.sock, nick, user, pass, real);
+
+            this.listener = new Thread(new ThreadStart(this.listenOnMainSocket));
+            this.listener.Start();
+        }
+
+        private Socket startSocket(string serverName, string port)
+        {
             host = Dns.GetHostEntry(serverName);
 
             IPAddress address = host.AddressList[0];
             IPEndPoint end = new IPEndPoint(address, Convert.ToInt32(port));
 
-            sock = new Socket(end.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            sock.Connect(end);
+            Socket temp = new Socket(end.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            temp.Connect(end);
 
-            if (!sock.Connected)
-            {
-                MessageBox.Show("Failed to connect!", "Failed");
-            }
+            return temp;
+        }
 
-            this.lblServerName.Text = serverName;
-            this.listener = new Thread(new ThreadStart(this.listenOnSocket));
-            this.listener.Start();
+        private void loginWithSocket(Socket sock, string nick, string user, string pass, string real)
+        {
+            if (pass.Length == 0)
+	        {
+		        pass = "**";
+        	}
+
+            Byte[] bytesSent = Encoding.ASCII.GetBytes("PASS " + pass + "\r\n");
+            sock.Send(bytesSent, bytesSent.Length, 0);
+
+            bytesSent = Encoding.ASCII.GetBytes("NICK " + nick + "\r\n");
+            sock.Send(bytesSent, bytesSent.Length, 0);
+
+            bytesSent = Encoding.ASCII.GetBytes("USER " + String.Join(" ", user, "0 *", real) + "\r\n");
+            sock.Send(bytesSent, bytesSent.Length, 0);
         }
 
         private void btnRemove_Click(object sender, EventArgs e)
@@ -157,15 +185,32 @@ namespace IRC_Client
                         this.Invoke(new Action<string, string>(writeToRoom), new object[] { room, line });
                         continue;
                     }
-                    string[] lines = line.Split('\n');
-                    foreach (var l in lines)
+                    string marker = "[" + DateTime.Now.ToString("HH:mm") + "] ";
+                    for (int i = 0; i < line.Length-1; i++)
                     {
-                        if (l.Equals(""))
+                        if (line[i] == '\n')
                         {
-                            continue;
+                            line = line.Substring(0, i + 1) + marker + line.Substring(i+1);
+                            i += marker.Length;
                         }
-                        box.AppendText("[" + DateTime.Now.ToString("HH:mm") + "] " + l + "\n");
                     }
+                    if (box.Text.EndsWith("\n"))
+                    {                        
+                        box.AppendText(marker + line);
+                    }
+                    else
+                    {
+                        box.AppendText(line);
+                    }
+                    //string[] lines = line.Split('\r');
+                    //foreach (var l in lines)
+                    //{
+                    //    if (l.Equals(""))
+                    //    {
+                    //        continue;
+                    //    }
+                    //    box.AppendText(marker + l);
+                    //}
                 }
             }
         }
@@ -193,7 +238,6 @@ namespace IRC_Client
         private void btnDisconnect_Click(object sender, EventArgs e)
         {
             this.listener.Abort();
-            this.registered = false;
         }
 
     }
