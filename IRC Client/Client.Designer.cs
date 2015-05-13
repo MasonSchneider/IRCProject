@@ -89,8 +89,9 @@
             // menuAddServer
             // 
             this.menuAddServer.Name = "menuAddServer";
-            this.menuAddServer.Size = new System.Drawing.Size(117, 22);
+            this.menuAddServer.Size = new System.Drawing.Size(152, 22);
             this.menuAddServer.Text = "Add Server";
+            this.menuAddServer.Click += new System.EventHandler(this.menuAddServer_Click);
             // 
             // btnSend
             // 

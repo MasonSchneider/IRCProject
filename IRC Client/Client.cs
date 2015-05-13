@@ -46,12 +46,12 @@ namespace IRC_Client
 
         void clientForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (this.listener.IsAlive)
+            if (this.listener != null && this.listener.IsAlive)
             {
                 this.listener.Abort();
             }
 
-            if (sock != null)
+            if (sock != null && sock.Connected)
             {
                 sock.Close();
             }
@@ -202,15 +202,6 @@ namespace IRC_Client
                     {
                         box.AppendText(line);
                     }
-                    //string[] lines = line.Split('\r');
-                    //foreach (var l in lines)
-                    //{
-                    //    if (l.Equals(""))
-                    //    {
-                    //        continue;
-                    //    }
-                    //    box.AppendText(marker + l);
-                    //}
                 }
             }
         }
@@ -238,6 +229,11 @@ namespace IRC_Client
         private void btnDisconnect_Click(object sender, EventArgs e)
         {
             this.listener.Abort();
+        }
+
+        private void menuAddServer_Click(object sender, EventArgs e)
+        {
+            this.btnAddServer_Click(null, null);
         }
 
     }
