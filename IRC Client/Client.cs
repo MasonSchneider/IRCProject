@@ -31,15 +31,28 @@ namespace IRC_Client
         {
             int bytes = 0;
             Byte[] bytesRecieved = new Byte[256];
+            sock.ReceiveTimeout = 1000;
+            sock.SendTimeout = 1000;
             do
             {
-                lock (sock)
+                if (sock.Poll(-1, SelectMode.SelectRead))
                 {
-                    bytes = sock.Receive(bytesRecieved, bytesRecieved.Length, 0);
-                }
-                if (bytes > 0)
-                {                    
-                    this.writeToRoom("server", Encoding.ASCII.GetString(bytesRecieved, 0, bytes));
+                    lock (sock)
+                    {
+                        try
+                        {
+                            bytes = sock.Receive(bytesRecieved, bytesRecieved.Length, 0);
+
+                        }
+                        catch (System.Net.Sockets.SocketException e)
+                        {
+
+                        }
+                    }
+                    if (bytes > 0)
+                    {
+                        this.writeToRoom("server", Encoding.ASCII.GetString(bytesRecieved, 0, bytes));
+                    }
                 }
             } while (true);
         }
@@ -74,6 +87,7 @@ namespace IRC_Client
         private void populateServers()
         {
             string servers = (string)Properties.Settings.Default["servers"];
+
             if (servers.Equals(""))
             {
                 this.lstServers.Items.Clear();
@@ -234,6 +248,46 @@ namespace IRC_Client
         private void menuAddServer_Click(object sender, EventArgs e)
         {
             this.btnAddServer_Click(null, null);
+        }
+
+        private void btnEdit_Click(object sender, EventArgs e)
+        {
+            var selected = this.lstServers.SelectedIndex;
+            var serverInfo = this.serverGroups[selected].Split(':');
+            string serverName = serverInfo[1];
+            string nick = serverInfo[0];
+            string port = serverInfo[2];
+            string pass = serverInfo[3];
+            string rooms = serverInfo[4];
+            string real = serverInfo[5];
+            string user = serverInfo[6];
+            NewServer srvDialog = new NewServer(serverName, nick, port, pass, rooms, real, user);
+            srvDialog.Show();
+            this.Enabled = false;
+            srvDialog.FormClosed += addClosed;
+            this.lstServers.Items.Clear();
+            populateServers();
+        }
+
+        private void btnSend_Click(object sender, EventArgs e)
+        {
+            if (!this.sock.Connected)
+            {
+                return;
+            }
+            string msg = txtMsg.Text.ToString();
+            if (msg.Length > 0)
+            {
+                lock (sock)
+                {
+                    System.Diagnostics.Debug.WriteLine("Locked sock");
+                    Byte[] bytesSent = Encoding.ASCII.GetBytes(msg + "\r\n");
+                    sock.Send(bytesSent, bytesSent.Length, 0);
+                }
+                System.Diagnostics.Debug.WriteLine("Unlocked sock");
+                txtMsg.Text = "";
+            }
+            
         }
 
     }

@@ -83,13 +83,13 @@
             this.menuServer.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.menuAddServer});
             this.menuServer.Name = "menuServer";
-            this.menuServer.Size = new System.Drawing.Size(49, 20);
+            this.menuServer.Size = new System.Drawing.Size(60, 20);
             this.menuServer.Text = "Server...";
             // 
             // menuAddServer
             // 
             this.menuAddServer.Name = "menuAddServer";
-            this.menuAddServer.Size = new System.Drawing.Size(152, 22);
+            this.menuAddServer.Size = new System.Drawing.Size(131, 22);
             this.menuAddServer.Text = "Add Server";
             this.menuAddServer.Click += new System.EventHandler(this.menuAddServer_Click);
             // 
@@ -101,6 +101,7 @@
             this.btnSend.TabIndex = 4;
             this.btnSend.Text = "Send";
             this.btnSend.UseVisualStyleBackColor = true;
+            this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
             // 
             // panel1
             // 
@@ -178,6 +179,7 @@
             this.btnEdit.TabIndex = 4;
             this.btnEdit.Text = "Edit";
             this.btnEdit.UseVisualStyleBackColor = true;
+            this.btnEdit.Click += new System.EventHandler(this.btnEdit_Click);
             // 
             // btnDisconnect
             // 

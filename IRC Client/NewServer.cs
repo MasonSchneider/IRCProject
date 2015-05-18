@@ -12,9 +12,26 @@ namespace IRC_Client
 {
     public partial class NewServer : Form
     {
+        private bool editing = false;
+        private String editServer = null;
         public NewServer()
         {
+            this.editing = false;
             InitializeComponent();
+        }
+        public NewServer(string serverName, string nick, string port, string pass, string rooms, string real, string user)
+        {
+            this.editing = true;
+            InitializeComponent();
+            this.txtNick.Text = nick;
+            this.txtPass.Text = pass;
+            this.txtPort.Text = port;
+            this.txtReal.Text = real;
+            this.txtRooms.Text = rooms;
+            this.txtServer.Text = serverName;
+            this.txtUsername.Text = user;
+            this.editServer = string.Join(":", nick, serverName, port, pass, rooms, real, user);
+
         }
 
         private void btnOk_Click(object sender, EventArgs e)
@@ -39,16 +56,32 @@ namespace IRC_Client
             }
 
             string curr = (string)Properties.Settings.Default["servers"];
-            if (curr.Length > 0)
-            {
-                curr += ",";
-            }
+
             string newServer = string.Join(":", nick, server, port, pass, rooms, real, user);
-            if (!curr.Contains(nick + ":" + server)) {
-                curr += newServer;
-            } else {
-                MessageBox.Show("This server and nickname is already set!", "Already exists");
-                return;
+            if (this.editing)
+            {
+                System.Diagnostics.Debug.WriteLine("Editing: "+newServer);
+                curr = curr.Replace(this.editServer, newServer);
+                if (curr.Contains(this.editServer))
+                {
+                    System.Diagnostics.Debug.WriteLine("DID NOT REPPLACE CORRECTLY");
+                }
+            }
+            else
+            {
+                if (curr.Length > 0)
+                {
+                    curr += ",";
+                }
+                if (!curr.Contains(nick + ":" + server))
+                {
+                    curr += newServer;
+                }
+                else
+                {
+                    MessageBox.Show("This server and nickname is already set!", "Already exists");
+                    return;
+                }
             }
             Properties.Settings.Default["servers"] = curr;
             Properties.Settings.Default.Save();
