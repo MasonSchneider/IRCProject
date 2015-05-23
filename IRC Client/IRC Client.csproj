@@ -53,6 +53,12 @@
     <Compile Include="Client.Designer.cs">
       <DependentUpon>Client.cs</DependentUpon>
     </Compile>
+    <Compile Include="NewRoom.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NewRoom.Designer.cs">
+      <DependentUpon>NewRoom.cs</DependentUpon>
+    </Compile>
     <Compile Include="NewServer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -63,6 +69,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Client.resx">
       <DependentUpon>Client.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NewRoom.resx">
+      <DependentUpon>NewRoom.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="NewServer.resx">
       <DependentUpon>NewServer.cs</DependentUpon>

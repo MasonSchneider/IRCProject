@@ -34,5 +34,17 @@ namespace IRC_Client.Properties {
                 this["servers"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string newRoom {
+            get {
+                return ((string)(this["newRoom"]));
+            }
+            set {
+                this["newRoom"] = value;
+            }
+        }
     }
 }

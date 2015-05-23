@@ -62,10 +62,6 @@ namespace IRC_Client
             {
                 System.Diagnostics.Debug.WriteLine("Editing: "+newServer);
                 curr = curr.Replace(this.editServer, newServer);
-                if (curr.Contains(this.editServer))
-                {
-                    System.Diagnostics.Debug.WriteLine("DID NOT REPPLACE CORRECTLY");
-                }
             }
             else
             {

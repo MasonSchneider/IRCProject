@@ -15,6 +15,10 @@ namespace IRC_Client
 {
     public partial class clientForm : Form
     {
+        enum type{
+            MSG,
+            JOIN
+        }
         string[] serverGroups;
         volatile Socket sock = null;
         IPHostEntry host = null;
@@ -46,11 +50,12 @@ namespace IRC_Client
                         }
                         catch (System.Net.Sockets.SocketException e)
                         {
-
+                            System.Diagnostics.Debug.WriteLine("Error: listenOnMainSocket Socket Exception.");
                         }
                     }
                     if (bytes > 0)
                     {
+                        //TODO: Change to write to correct room
                         this.writeToRoom("server", Encoding.ASCII.GetString(bytesRecieved, 0, bytes));
                     }
                 }
@@ -76,6 +81,7 @@ namespace IRC_Client
             srvDialog.Show();
             this.Enabled = false;
             srvDialog.FormClosed += addClosed;
+            
         }
 
         private void addClosed(object sender, FormClosedEventArgs e)
@@ -237,7 +243,17 @@ namespace IRC_Client
 
         private void btnJoinRoom_Click(object sender, EventArgs e)
         {
-
+            NewRoom roomDialog = new NewRoom();
+            roomDialog.Show();
+            this.Enabled = false;
+            roomDialog.FormClosed += addRoomClosed;
+        }
+        private void addRoomClosed(object sender, FormClosedEventArgs e)
+        {
+            this.Enabled = true;
+            string room = (string)Properties.Settings.Default["newRoom"];
+            makeRoomTab(room);
+            sendMsg(room, type.JOIN);
         }
 
         private void btnDisconnect_Click(object sender, EventArgs e)
@@ -271,23 +287,33 @@ namespace IRC_Client
 
         private void btnSend_Click(object sender, EventArgs e)
         {
-            if (!this.sock.Connected)
+            if (this.sock == null || !this.sock.Connected)
             {
                 return;
             }
             string msg = txtMsg.Text.ToString();
             if (msg.Length > 0)
             {
-                lock (sock)
-                {
-                    System.Diagnostics.Debug.WriteLine("Locked sock");
-                    Byte[] bytesSent = Encoding.ASCII.GetBytes(msg + "\r\n");
-                    sock.Send(bytesSent, bytesSent.Length, 0);
-                }
-                System.Diagnostics.Debug.WriteLine("Unlocked sock");
+                sendMsg(msg,type.MSG);
                 txtMsg.Text = "";
             }
             
+        }
+        private void sendMsg(string msg, type t)
+        {
+            Byte[] bytesSent = null;
+            switch(t){
+                case(type.JOIN):
+                    bytesSent = Encoding.ASCII.GetBytes("JOIN #"+msg+"\r\n");
+                    break;
+                case(type.MSG):
+                    bytesSent = Encoding.ASCII.GetBytes("PRIVMSG #"+this.tabChats.SelectedTab.Text+" :"+msg+"\r\n");
+                    break;
+            }
+            lock(sock)
+            {
+                sock.Send(bytesSent,bytesSent.Length,0);
+            }
         }
 
     }
