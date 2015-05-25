@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace IRC_Client
 {
@@ -35,33 +36,125 @@ namespace IRC_Client
         {
             int bytes = 0;
             Byte[] bytesRecieved = new Byte[256];
+
             sock.ReceiveTimeout = 1000;
             sock.SendTimeout = 1000;
+
+            String outputString = "";
+            String bit = "1";
+            bytes = 0;
+
             do
             {
+                
                 if (sock.Poll(-1, SelectMode.SelectRead))
                 {
                     lock (sock)
                     {
                         try
                         {
+                            //GETS THE STUFF FROM THE SERVER
+                            
                             bytes = sock.Receive(bytesRecieved, bytesRecieved.Length, 0);
-
                         }
+
                         catch (System.Net.Sockets.SocketException e)
                         {
+
                             System.Diagnostics.Debug.WriteLine("Error: listenOnMainSocket Socket Exception.");
                         }
                     }
-                    if (bytes > 0)
-                    {
-                        //TODO: Change to write to correct room
-                        this.writeToRoom("server", Encoding.ASCII.GetString(bytesRecieved, 0, bytes));
-                    }
+    
+                        if (bytes > 0)
+                        {
+                            bit = Encoding.ASCII.GetString(bytesRecieved);
+
+                            outputString += bit;
+
+                            //TODO: Change to write to correct room
+                            if (bit.Contains("\r\n"))
+                            {
+
+                                Regex inputs = new Regex(":(.*?) (.*?):(.*?)\r\n", RegexOptions.IgnoreCase);
+                                var split = inputs.Split(outputString);
+                                System.Diagnostics.Debug.WriteLine("--------------------------");
+                                //First one is garbage we want the next 3
+                                for (var i=1; i<split.Length;i+=4 )
+                                {
+                                    var server = split[i];
+                                    var status = split[i + 1];
+                                    var data = split[i + 2];
+
+                                    doStuff(server, status, data);
+                                    System.Diagnostics.Debug.Write("{");
+                                    System.Diagnostics.Debug.Write("{"+server+"}"+"{"+status+"}"+"{"+data+"}");
+                                    System.Diagnostics.Debug.Write("}\n");
+
+                                }
+
+                                //System.Diagnostics.Debug.WriteLine("split length: ");
+                                //System.Diagnostics.Debug.WriteLine(split.Length);
+                                //System.Diagnostics.Debug.WriteLine(outputString);
+                                this.writeToRoom("server", outputString);
+                                //"\r\n" + somethin that is the start of the next line
+                                outputString = split[split.Length - 1];
+                                bit = "1";
+                                bytes = 0;
+                                Array.Clear(bytesRecieved, 0, bytesRecieved.Length);
+
+                            }
+                        }
+                    
                 }
             } while (true);
         }
 
+        private void doStuff(String server, String status, String data)
+        {
+            char[] delimiterChars = {' '};
+            string[] statuss = status.Split(delimiterChars);
+            int value;
+            switch (statuss[0])
+            {
+                case "353":
+                    //Nicklist
+                    break;
+                case "332":
+                    //MOTD
+                    if (statuss[2] == "##chat")
+                    {
+                        this.writeToRoom("general", data+"\n");
+                    }
+                    else
+                    {
+                        this.writeToRoom(statuss[2].Substring(1), data + "\n");
+                    }
+
+                    break;
+                case "PRIVMSG":
+                    string[] names = server.Split(new string[] { "!" }, StringSplitOptions.None);
+                    if (statuss[1] == "##chat")
+                    {
+                        this.writeToRoom("general", " "+ names[0] + "> " + data + "\n");
+                    }
+                    else
+                    {
+                        this.writeToRoom(statuss[1].Substring(1), " " + names[0] + "> " + data + "\n");
+                    }
+                    break;
+                case "JOIN":
+                    break;
+                case "QUIT":
+                    break;
+                default:
+                    this.writeToRoom("server", server + ": " + status + ": " + data + "\n");
+                    //print to server
+                    break;
+
+            }
+
+
+        }
         void clientForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             if (this.listener != null && this.listener.IsAlive)
