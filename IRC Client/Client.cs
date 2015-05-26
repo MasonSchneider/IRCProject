@@ -392,6 +392,7 @@ namespace IRC_Client
 
             bytesSent = Encoding.ASCII.GetBytes("USER " + String.Join(" ", user, "0 *", real) + "\r\n");
             sock.Send(bytesSent, bytesSent.Length, 0);
+
         }
 
         private void btnRemove_Click(object sender, EventArgs e)
@@ -426,7 +427,7 @@ namespace IRC_Client
                     }
                     else
                     {
-                        box.AppendText(line);
+                        box.AppendText(marker + line);
                     }
                 }
             }
@@ -501,6 +502,7 @@ namespace IRC_Client
             if (msg.Length > 0)
             {
                 sendMsg(msg,type.MSG);
+                writeToRoom(this.tabChats.SelectedTab.Text,msg);
                 txtMsg.Text = "";
             }
             
@@ -542,7 +544,6 @@ namespace IRC_Client
 
             //change to the right nicknames
             String newTab = getTabName();
-
             updateNicklist(newTab);
 
 
