@@ -299,6 +299,7 @@
             this.btnLeave.TabIndex = 14;
             this.btnLeave.Text = "Leave Channel";
             this.btnLeave.UseVisualStyleBackColor = true;
+            this.btnLeave.Click += new System.EventHandler(this.btnLeave_Click_1);
             // 
             // clientForm
             // 
