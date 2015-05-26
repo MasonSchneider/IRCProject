@@ -239,6 +239,7 @@
             this.lstNicks.SelectionMode = System.Windows.Forms.SelectionMode.None;
             this.lstNicks.Size = new System.Drawing.Size(207, 433);
             this.lstNicks.TabIndex = 11;
+            this.lstNicks.SelectedIndexChanged += new System.EventHandler(this.s);
             // 
             // lblServerName
             // 
@@ -260,10 +261,11 @@
             this.tabPageMain.TabIndex = 0;
             this.tabPageMain.Text = "server";
             this.tabPageMain.UseVisualStyleBackColor = true;
+            this.tabPageMain.Click += new System.EventHandler(this.tabPageMain_Click);
             // 
             // txtChatMain
             // 
-            this.txtChatMain.Location = new System.Drawing.Point(6, 6);
+            this.txtChatMain.Location = new System.Drawing.Point(3, 0);
             this.txtChatMain.Multiline = true;
             this.txtChatMain.Name = "txtChatMain";
             this.txtChatMain.ReadOnly = true;
@@ -271,15 +273,19 @@
             this.txtChatMain.Size = new System.Drawing.Size(729, 474);
             this.txtChatMain.TabIndex = 0;
             this.txtChatMain.Text = "Connect to a server";
+            this.txtChatMain.TextChanged += new System.EventHandler(this.txtChatMain_TextChanged);
             // 
             // tabChats
             // 
             this.tabChats.Controls.Add(this.tabPageMain);
-            this.tabChats.Location = new System.Drawing.Point(235, 69);
+            this.tabChats.Location = new System.Drawing.Point(235, 74);
             this.tabChats.Name = "tabChats";
             this.tabChats.SelectedIndex = 0;
             this.tabChats.Size = new System.Drawing.Size(749, 512);
             this.tabChats.TabIndex = 0;
+            this.tabChats.SelectedIndexChanged += new System.EventHandler(this.tabChats_SelectedIndexChanged);
+            this.tabChats.Selected += new System.Windows.Forms.TabControlEventHandler(this.tabChats_Selected);
+            this.tabChats.TabIndexChanged += new System.EventHandler(this.tabChats_TabIndexChanged);
             // 
             // btnJoinRoom
             // 
@@ -299,6 +305,7 @@
             this.btnLeave.TabIndex = 14;
             this.btnLeave.Text = "Leave Channel";
             this.btnLeave.UseVisualStyleBackColor = true;
+            this.btnLeave.Click += new System.EventHandler(this.btnLeave_Click);
             // 
             // clientForm
             // 
@@ -326,6 +333,7 @@
             this.MaximizeBox = false;
             this.Name = "clientForm";
             this.Text = "Rose IRC Client";
+            this.Load += new System.EventHandler(this.clientForm_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.panel1.ResumeLayout(false);
