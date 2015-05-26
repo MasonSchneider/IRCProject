@@ -69,6 +69,8 @@ namespace IRC_Client
                             System.Diagnostics.Debug.WriteLine("Error: listenOnMainSocket Socket Exception.");
                         }
                     }
+
+                    
     
                         if (bytes > 0)
                         {
@@ -76,9 +78,14 @@ namespace IRC_Client
 
                             outputString += bit;
 
+
+                            System.Diagnostics.Debug.WriteLine(bit);
+
                             //TODO: Change to write to correct room
-                            if (bit.Contains("\r\n"))
+                            if (outputString.Contains("\r\n"))
                             {
+
+
 
                                 Regex inputs = new Regex(":(.*?) (.*?):(.*?)\r\n", RegexOptions.IgnoreCase);
                                 var split = inputs.Split(outputString);
@@ -91,16 +98,15 @@ namespace IRC_Client
                                     var data = split[i + 2];
 
                                     doStuff(server, status, data);
-                                    System.Diagnostics.Debug.Write("{");
-                                    System.Diagnostics.Debug.Write("{"+server+"}"+"{"+status+"}"+"{"+data+"}");
-                                    System.Diagnostics.Debug.Write("}\n");
+                                    //System.Diagnostics.Debug.Write("{");
+                                    System.Diagnostics.Debug.WriteLine("{"+server+"}"+"{"+status+"}"+"{"+data+"}");
+                                    //System.Diagnostics.Debug.Write("}\n");
 
                                 }
 
                                 //System.Diagnostics.Debug.WriteLine("split length: ");
                                 //System.Diagnostics.Debug.WriteLine(split.Length);
-                                //System.Diagnostics.Debug.WriteLine(outputString);
-                                this.writeToRoom("server", outputString);
+
                                 //"\r\n" + somethin that is the start of the next line
                                 outputString = split[split.Length - 1];
                                 bit = "1";
@@ -119,6 +125,10 @@ namespace IRC_Client
             char[] delimiterChars = {' '};
             string[] statuss = status.Split(delimiterChars);
             int value;
+
+
+            System.Diagnostics.Debug.WriteLine("{" + server + "}" + "{" + status + "}" + "{" + data + "}");
+
             switch (statuss[0])
             {
                 case "353":
@@ -142,12 +152,6 @@ namespace IRC_Client
                         this.nicknames[key].Add(nick);
                     }
 
-                    System.Diagnostics.Debug.Write("Printing nick list: ");
-
-                    foreach (string nick in this.nicknames[key])
-                    {
-                        System.Diagnostics.Debug.Write(nick);
-                    }
                     break;
                 case "366":
                     key  = "";
@@ -190,8 +194,14 @@ namespace IRC_Client
                     }
                     break;
                 case "JOIN":
+                    //Need to add the person on join but we don't know the channel they are joining to
+                    names = server.Split(new string[] { "!" }, StringSplitOptions.None);
+                    System.Diagnostics.Debug.WriteLine("We just got a JOIN");
                     break;
                 case "QUIT":
+                    //Need to add the person on join but we don't know the channel they are joining to
+                    names = server.Split(new string[] { "!" }, StringSplitOptions.None);
+
                     break;
                 default:
                     this.writeToRoom("server", server + ": " + status + ": " + data + "\n");
@@ -239,16 +249,20 @@ namespace IRC_Client
             {
                 clearNicks("aa");
             }
-
-            foreach (string nick in this.nicknames[room])
+            if (this.nicknames.ContainsKey(room))
             {
-                if (lstNicks.InvokeRequired)
+                foreach (string nick in this.nicknames[room])
                 {
-                    this.Invoke(new Action<String>(addItemToNicklist), new object[] { nick });
-                } else {
-                    addItemToNicklist(nick);
+                    if (lstNicks.InvokeRequired)
+                    {
+                        this.Invoke(new Action<String>(addItemToNicklist), new object[] { nick });
+                    }
+                    else
+                    {
+                        addItemToNicklist(nick);
+                    }
+
                 }
-                
             }
             
 
@@ -548,6 +562,23 @@ namespace IRC_Client
 
         private void s(object sender, EventArgs e)
         {
+
+        }
+
+        private void btnLeave_Click(object sender, EventArgs e)
+        {
+            string closingTab = getTabName();
+            this.nicknames.Remove(closingTab);
+
+            //TODO: This is where we need to graphically remove the tab and all that.
+
+
+
+
+
+
+
+
 
         }
 
