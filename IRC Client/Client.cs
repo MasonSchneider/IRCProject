@@ -24,9 +24,14 @@ namespace IRC_Client
         volatile Socket sock = null;
         IPHostEntry host = null;
         Thread listener;
+        Dictionary<String, List<String>> nicknames = new Dictionary<String, List<String>>();
+        
+
 
         public clientForm()
         {
+            nicknames["server"] = new List<String>();
+            nicknames["server"].Add("Click a channel to view users");
             InitializeComponent();
             populateServers();
             this.FormClosed += clientForm_FormClosed;
@@ -118,6 +123,48 @@ namespace IRC_Client
             {
                 case "353":
                     //Nicklist
+                    string key  = "";
+                    if (statuss[3] == "##chat")
+                    {
+                        key = "general";
+                    }
+                    else{
+                        key = statuss[3].Substring(1);
+                    }
+                    if (!this.nicknames.ContainsKey(key))
+                    {
+                        this.nicknames.Add(key, new List<String>());
+                    }
+
+                    string[] nicks = data.Split(delimiterChars);
+                    foreach (string nick in nicks)
+                    {
+                        this.nicknames[key].Add(nick);
+                    }
+
+                    System.Diagnostics.Debug.Write("Printing nick list: ");
+
+                    foreach (string nick in this.nicknames[key])
+                    {
+                        System.Diagnostics.Debug.Write(nick);
+                    }
+                    break;
+                case "366":
+                    key  = "";
+                    
+                    if (statuss[2] == "##chat")
+                    {
+                        key = "general";
+                    }
+                    else{
+                        key = statuss[2].Substring(1);
+                    }
+                    
+
+                    string tab = getTabName();
+                    if(key.Equals(tab)){
+                        updateNicklist(key);
+                    }
                     break;
                 case "332":
                     //MOTD
@@ -154,6 +201,58 @@ namespace IRC_Client
             }
 
 
+        }
+
+        public string  getTabName()
+         {
+            if (tabChats.InvokeRequired)
+            {
+                string res = "";
+                var action = new Action<TabControl>(c => res = c.SelectedTab.Text);
+                tabChats.Invoke(action, tabChats);
+                return res;
+            }
+            string varText = tabChats.SelectedTab.Text;
+            return varText;
+        }
+
+        
+
+        private void addItemToNicklist(String s)
+        {
+            lstNicks.Items.Add(s);
+        }
+
+        private void clearNicks(String s)
+        {
+            lstNicks.Items.Clear();
+        }
+
+        private void updateNicklist(String room)
+        {
+
+            if (lstNicks.InvokeRequired)
+            {
+                this.Invoke(new Action<String>(clearNicks), new object[] { "aa"});
+            }
+            else
+            {
+                clearNicks("aa");
+            }
+
+            foreach (string nick in this.nicknames[room])
+            {
+                if (lstNicks.InvokeRequired)
+                {
+                    this.Invoke(new Action<String>(addItemToNicklist), new object[] { nick });
+                } else {
+                    addItemToNicklist(nick);
+                }
+                
+            }
+            
+
+            
         }
         void clientForm_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -407,6 +506,49 @@ namespace IRC_Client
             {
                 sock.Send(bytesSent,bytesSent.Length,0);
             }
+        }
+
+        private void tabPageMain_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void clientForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtChatMain_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tabChats_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+            //change to the right nicknames
+            String newTab = getTabName();
+
+            updateNicklist(newTab);
+
+
+
+        }
+
+        private void tabChats_TabIndexChanged(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void tabChats_Selected(object sender, TabControlEventArgs e)
+        {
+
+
+        }
+
+        private void s(object sender, EventArgs e)
+        {
+
         }
 
     }
