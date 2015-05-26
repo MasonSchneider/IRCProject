@@ -687,7 +687,7 @@ namespace IRC_Client
             {
                 sendMsg(msg,type.MSG);
                 msg += "\n";
-                writeToRoom(this.tabChats.SelectedTab.Text,msg);
+                writeToRoom(this.tabChats.SelectedTab.Text,this.myNick + "> " + msg);
                 txtMsg.Text = "";
             }
             
@@ -726,11 +726,7 @@ namespace IRC_Client
 
         private void tabChats_SelectedIndexChanged(object sender, EventArgs e)
         {
-
-            //change to the right nicknames
-            String newTab = getTabName();
-            updateNicklist(newTab);
-
+           
 
 
         }
@@ -765,6 +761,20 @@ namespace IRC_Client
             }
 
 
+
+        }
+
+        private void tabPageMain_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tabChats_SelectedIndexChanged_1(object sender, EventArgs e)
+        {
+
+            //change to the right nicknames
+            String newTab = getTabName();
+            updateNicklist(newTab);
 
         }
 
