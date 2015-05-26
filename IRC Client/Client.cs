@@ -25,6 +25,7 @@ namespace IRC_Client
         IPHostEntry host = null;
         Thread listener;
         Dictionary<String, List<String>> nicknames = new Dictionary<String, List<String>>();
+        string myNick = "notsetyet";
         
 
 
@@ -48,18 +49,23 @@ namespace IRC_Client
             String outputString = "";
             String bit = "1";
             bytes = 0;
+            string[] newlineDelimiter = {"\r\n"};
+            char[] spaceDelimiter = {' '};
+            char[] periodSpaceDelimiter = { '.', ' ' };
+            char[] exclamationDelimiter = { '!' };
+            char[] colonDelimiter = { ':' };
 
             do
             {
-                
-                if (sock.Poll(-1, SelectMode.SelectRead))
+
+                if (sock.Poll(1000, SelectMode.SelectRead))
                 {
                     lock (sock)
                     {
                         try
                         {
                             //GETS THE STUFF FROM THE SERVER
-                            
+
                             bytes = sock.Receive(bytesRecieved, bytesRecieved.Length, 0);
                         }
 
@@ -70,9 +76,183 @@ namespace IRC_Client
                         }
                     }
 
-                    
+
+
+                    if (bytes > 0)
+                    {
+                        bit = Encoding.ASCII.GetString(bytesRecieved, 0, bytes);
+
+                        //add on the remaining tail portion from last received string
+                        outputString += bit;
+
+                    }
+
+                }
+
+                if (outputString.Contains("\r\n"))
+                {
+
+                    //split on "\r\n"
+                    var split = outputString.Split(newlineDelimiter, 2, StringSplitOptions.None);
+
+                    outputString = split[1];
+
+                    string nextLine = split[0];
+                    System.Diagnostics.Debug.WriteLine("Received: {" +nextLine + "}");
+
+                    //first handle PINGs
+                    split = nextLine.Split(spaceDelimiter, 2, StringSplitOptions.None);
+
+                    if (split[0].Equals("PING"))
+                    {
+                        //send PONG
+                        Byte[] bytesSent = Encoding.ASCII.GetBytes("PONG");
+                        sock.Send(bytesSent, bytesSent.Length, 0);
+                        System.Diagnostics.Debug.WriteLine("Sent: {" + "PONG" + "}");
+                    }
+                    else
+                    {
+
+                        string source = split[0];
+                        string message = split[1];
+                        //check if its a server message or a personal message
+                        split = source.Split(periodSpaceDelimiter, 2, StringSplitOptions.None);
+
+                        if (split[0].Substring(1).Equals(this.myNick) || split[0].Equals(":NickServ!NickServ@services") || split[0].Equals(":ChanServ!ChanServ@services"))
+                        {
+                            //treat like a server.  its this weird particular messages {:lilfrosty MODE lilfrosty :+i}, {:NickServ!NickServ@services. NOTICE lilfrosty :lilfrosty is not a registered nickname.}
+
+                            //handle like a server message, just print it out to the console
+                            this.writeToRoom("server", message.Split(spaceDelimiter, 3, StringSplitOptions.None)[2] + "\n");
+                        }
+                        else if (split.Length == 2 && split[1] == "freenode.net")
+                        {
+                            //it's a message from the server
+                            //the first bit will be the code
+                            split = message.Split(spaceDelimiter, 5, StringSplitOptions.None);
+                            string typeCode = split[0];
+
+                            //TODO: handle server messages.  they will have that server code thingy
+                            if (typeCode.Equals("353"))
+                            {
+                                //get key
+                                string key = split[3].Substring(1);
+                                if (key.Equals("#chat"))
+                                {
+                                    key = "general"; //peform the #chat -> general swap
+                                }
+
+                                System.Diagnostics.Debug.WriteLine("key = " + key);
+
+                                if (!this.nicknames.ContainsKey(key))
+                                {
+                                    this.nicknames.Add(key, new List<String>());
+                                }
+
+                                string data = split[4].Substring(1);
+                                string[] nicks = data.Split(spaceDelimiter);
+                                foreach (string nick in nicks)
+                                {
+                                    this.nicknames[key].Add(nick);
+                                }
+                            }
+                            else if (typeCode.Equals("366"))
+                            {
+
+                                //get key
+                                string key = split[2].Substring(1);
+                                if (key.Equals("#chat"))
+                                {
+                                    key = "general"; //peform the #chat -> general swap
+                                }
+
+                                string tab = getTabName();
+                                if (key.Equals(tab))
+                                {
+                                    updateNicklist(key);
+                                }
+                            }
+                            else if (typeCode.Equals("332"))
+                            {
+                                //message of the day
+
+                                //get key
+                                string key = split[2].Substring(1);
+                                if (key.Equals("#chat"))
+                                {
+                                    key = "general"; //peform the #chat -> general swap
+                                }
+                                this.writeToRoom(key, message.Split(spaceDelimiter, 4, StringSplitOptions.None)[3].Substring(1) + "\n");
+                            }
+                            else {
+                                //just log it to the console
+                                this.writeToRoom("server", message.Split(spaceDelimiter, 3, StringSplitOptions.None)[2] + "\n");
+                            }
+
+                        }
+                        else
+                        {
+                            //it's a message from another user
+                            split = source.Split(exclamationDelimiter, 2, StringSplitOptions.None);
+                            string userNick = split[0].Substring(1);
+
+                            split = message.Split(spaceDelimiter, 3, StringSplitOptions.None);
+                            string typeCode = split[0]; // PRIVMSG, JOIN, or QUIT
+                            string chatRoom = split[1].Substring(1); //takes off the hashtag
+                            if (chatRoom.Equals("#chat"))
+                            {
+                                chatRoom = "general"; //peform the #chat -> general swap
+                            }
+                            //message = split[2]
+
+                            if (typeCode.Equals("PRIVMSG"))
+                            {
+                                //it is a message, so it's safe to use split[2].substring(1) as the message contents
+
+                                this.writeToRoom(chatRoom, userNick + "> " + split[2].Substring(1) + "\n");
+                            }
+                            else if (typeCode.Equals("JOIN"))
+                            {
+                                if (userNick != this.myNick) { //ignore your own notification
+                                    //System.Diagnostics.Debug.WriteLine("Message from: " + userNick + " of type: " + typeCode + " in chat room: " + chatRoom);
+                                    this.nicknames[chatRoom].Add(userNick);
+                                    string tab = getTabName();
+                                    if (chatRoom.Equals(tab))
+                                    {
+                                        updateNicklist(chatRoom);
+                                    }
+                                }
+                            }
+                            else if (typeCode.Equals("QUIT"))
+                            {
+
+                                if (userNick != this.myNick) //ignore your own notification
+                                {
+                                    foreach (string room in this.nicknames.Keys)
+                                    {
+                                        this.nicknames[room].Remove(userNick); // removes him from all rooms
+                                    }
+
+                                    string tab = getTabName();
+                                    if (chatRoom.Equals(tab))
+                                    {
+                                        updateNicklist(chatRoom);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                System.Diagnostics.Debug.WriteLine("Message from: " + userNick + " of type: " + typeCode + " in chat room: " + chatRoom);
+                                this.writeToRoom("server", "Undisplayed message, fell through the parsing: {" + source + " " + message + "}");
+                            }
+
+                        }
+                    }
+                }
+
+                    //-----------------------------------------------------------------------------------------------------------------------------------
     
-                        if (bytes > 0)
+                        if (false)
                         {
                             bit = Encoding.ASCII.GetString(bytesRecieved);
 
@@ -89,6 +269,7 @@ namespace IRC_Client
 
                                 Regex inputs = new Regex(":(.*?) (.*?):(.*?)\r\n", RegexOptions.IgnoreCase);
                                 var split = inputs.Split(outputString);
+                                
                                 System.Diagnostics.Debug.WriteLine("--------------------------");
                                 //First one is garbage we want the next 3
                                 for (var i=1; i<split.Length;i+=4 )
@@ -99,7 +280,7 @@ namespace IRC_Client
 
                                     doStuff(server, status, data);
                                     //System.Diagnostics.Debug.Write("{");
-                                    System.Diagnostics.Debug.WriteLine("{"+server+"}"+"{"+status+"}"+"{"+data+"}");
+                                    //System.Diagnostics.Debug.WriteLine("{"+server+"}"+"{"+status+"}"+"{"+data+"}");
                                     //System.Diagnostics.Debug.Write("}\n");
 
                                 }
@@ -116,7 +297,7 @@ namespace IRC_Client
                             }
                         }
                     
-                }
+                
             } while (true);
         }
 
@@ -339,11 +520,12 @@ namespace IRC_Client
                 this.sock.Close();
             }
             this.txtChatMain.Clear();
-            this.txtChatMain.AppendText("Connecting...\r\n");
             var selected = this.lstServers.SelectedIndex;
             var serverInfo = this.serverGroups[selected].Split(':');
             string serverName = serverInfo[1];
+            this.txtChatMain.AppendText("Connecting to " + serverName + "...\r\n");
             string nick = serverInfo[0];
+            this.myNick = nick;
             string port = serverInfo[2];
             string pass = serverInfo[3];
             string rooms = serverInfo[4];
@@ -367,6 +549,8 @@ namespace IRC_Client
         private Socket startSocket(string serverName, string port)
         {
             host = Dns.GetHostEntry(serverName);
+
+            //this.txtChatMain.AppendText("Redirected to " + host.HostName + "...\r\n");
 
             IPAddress address = host.AddressList[0];
             IPEndPoint end = new IPEndPoint(address, Convert.ToInt32(port));
